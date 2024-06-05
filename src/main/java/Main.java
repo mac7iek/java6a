@@ -14,11 +14,12 @@ Poniższe zadania będą się sprowadzały do modyfikacji bazowego kodu. Proces 
 
 import java.io.IOException;
 import java.util.Scanner;
-import java.io.IOException;
 
 class WrongStudentName extends Exception { }
 
-class Main {
+class InvalidAgeException extends Exception { }
+
+public class Main {
     public static Scanner scan = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -32,9 +33,11 @@ class Main {
                     default: return;
                 }
             } catch(IOException e) {
-
+                System.out.println("IOException occurred: " + e.getMessage());
             } catch(WrongStudentName e) {
                 System.out.println("Błędne imie studenta!");
+            } catch(InvalidAgeException e) {
+                System.out.println("Wiek musi być w przedziale od 0 do 100 lat!");
             }
         }
     }
@@ -49,7 +52,7 @@ class Main {
     }
 
     public static String ReadName() throws WrongStudentName {
-        scan.nextLine();
+        scan.nextLine(); 
         System.out.println("Podaj imie: ");
         String name = scan.nextLine();
         if(name.contains(" "))
@@ -58,12 +61,19 @@ class Main {
         return name;
     }
 
-    public static void exercise1() throws IOException, WrongStudentName {
-        var name = ReadName();
+    public static int ReadAge() throws InvalidAgeException {
         System.out.println("Podaj wiek: ");
-        var age = scan.nextInt();
-        scan.nextLine();
-        System.out.println("Podaj datę urodzenia DD-MM-YYY");
+        int age = scan.nextInt();
+        if(age < 0 || age > 100)
+            throw new InvalidAgeException();
+        return age;
+    }
+
+    public static void exercise1() throws IOException, WrongStudentName, InvalidAgeException {
+        var name = ReadName();
+        var age = ReadAge();
+        scan.nextLine(); 
+        System.out.println("Podaj datę urodzenia DD-MM-YYYY");
         var date = scan.nextLine();
         (new Service()).addStudent(new Student(name, age, date));
     }
@@ -76,7 +86,7 @@ class Main {
     }
 
     public static void exercise3() throws IOException {
-        scan.nextLine();
+        scan.nextLine(); 
         System.out.println("Podaj imie: ");
         var name = scan.nextLine();
         var wanted = (new Service()).findStudentByName(name);
