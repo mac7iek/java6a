@@ -13,11 +13,16 @@ Poniższe zadania będą się sprowadzały do modyfikacji bazowego kodu. Proces 
 //Niepoprawny wiek – gdy jest mniejszy od 0 lub większy niż 100. Niepoprawna data urodzenia – gdy nie jest zapisana w formacie DD-MM-YYYY, np. 28-02-2023.
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 class WrongStudentName extends Exception { }
 
 class InvalidAgeException extends Exception { }
+
+class InvalidDateException extends Exception { }
 
 public class Main {
     public static Scanner scan = new Scanner(System.in);
@@ -38,6 +43,8 @@ public class Main {
                 System.out.println("Błędne imie studenta!");
             } catch(InvalidAgeException e) {
                 System.out.println("Wiek musi być w przedziale od 0 do 100 lat!");
+            } catch(InvalidDateException e) {
+                System.out.println("Błędna data urodzenia!");
             }
         }
     }
@@ -69,12 +76,27 @@ public class Main {
         return age;
     }
 
-    public static void exercise1() throws IOException, WrongStudentName, InvalidAgeException {
-        var name = ReadName();
-        var age = ReadAge();
+    public static String ReadDateOfBirth() throws InvalidDateException {
         scan.nextLine(); 
         System.out.println("Podaj datę urodzenia DD-MM-YYYY");
-        var date = scan.nextLine();
+        String dateStr = scan.nextLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        try {
+            LocalDate date = LocalDate.parse(dateStr, formatter);
+            int year = date.getYear();
+            if (year < 1900 || year > 2024) {
+                throw new InvalidDateException();
+            }
+            return dateStr;
+        } catch (DateTimeParseException e) {
+            throw new InvalidDateException();
+        }
+    }
+
+    public static void exercise1() throws IOException, WrongStudentName, InvalidAgeException, InvalidDateException {
+        var name = ReadName();
+        var age = ReadAge();
+        var date = ReadDateOfBirth();
         (new Service()).addStudent(new Student(name, age, date));
     }
 
@@ -86,7 +108,7 @@ public class Main {
     }
 
     public static void exercise3() throws IOException {
-        scan.nextLine(); 
+        scan.nextLine();
         System.out.println("Podaj imie: ");
         var name = scan.nextLine();
         var wanted = (new Service()).findStudentByName(name);
